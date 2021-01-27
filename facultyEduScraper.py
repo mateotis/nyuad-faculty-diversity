@@ -3,7 +3,32 @@ import requests
 import urllib
 import csv
 
-url = "https://nyuad.nyu.edu/en/academics/divisions/arts-and-humanities/faculty.html"
+while True: # Ask for user input to decide which division to scrape
+	division = input("Welcome to the NYUAD faculty education scraper.\nWhich division would you like analysed?\nValid choices are Science, Social Science, Engineering, Arts and Humanities.\n")
+	if division == "Science":
+		urlDiv = "science" # What url requests goes to
+		dataDiv = "Science" # What gets entered into the Division field
+		csvName = "facultyEduInfo-Science.csv" # What the name of the exported csv file is
+		break
+	elif division == "Social Science":
+		urlDiv = "social-science"
+		dataDiv = "Social Science"
+		csvName = "facultyEduInfo-SocialScience.csv"
+		break
+	elif division == "Engineering":
+		urlDiv = "engineering"
+		dataDiv = "Engineering"
+		csvName = "facultyEduInfo-Engineering.csv"
+		break
+	elif division == "Arts and Humanities":
+		urlDiv = "arts-and-humanities"
+		dataDiv = "Arts and Humanities"
+		csvName = "facultyEduInfo-ArtsAndHumanities.csv"
+		break
+	else:
+		print("Invalid input. Please try again.\n")
+
+url = "https://nyuad.nyu.edu/en/academics/divisions/"+urlDiv+"/faculty.html"
 response = requests.get(url)
 
 soup = bs(response.text,"html.parser")
@@ -21,7 +46,7 @@ for i in range(0,200): # Arbitrary range, faculty numbers are much less than thi
 
 	facultyName = faculty.find("a").text # Their name is within a link
 	facultyInfo.append(facultyName)
-	facultyInfo.append("Arts and Humanities")
+	facultyInfo.append(dataDiv)
 	facultyEduLoc = faculty.text.find("Education") # Find the Education string
 
 	if(facultyEduLoc == -1):
@@ -59,12 +84,10 @@ for i in range(0,200): # Arbitrary range, faculty numbers are much less than thi
 	facultyInfo.extend([facultyBachelors, facultyMasters, facultyDoctorates, facultyOther])
 	facultyTotal.append(facultyInfo)
 
-	#print("Name:", facultyInfo[0], "\n", "Division:", facultyInfo[1], "\n", "Bachelor's:", facultyInfo[2], "\n", "Master's:", facultyInfo[3], "\n", "Doctorate:", facultyInfo[4], "\n", "Other:", facultyInfo[5])
-
 for facultyInfo in facultyTotal:
 	print("Name:", facultyInfo[0], "\n", "Division:", facultyInfo[1], "\n", "Bachelor's:", facultyInfo[2], "\n", "Master's:", facultyInfo[3], "\n", "Doctorate:", facultyInfo[4], "\n", "Other:", facultyInfo[5], "\n\n")
 
-with open('facultyEduInfo.csv', mode='w', encoding = "UTF-8") as fEduInfo:
+with open(csvName, mode='w', encoding = "UTF-8") as fEduInfo:
 	fieldnames = ["Name", "Division", "Bachelor's", "Master's", "Doctorate", "Other"]
 	writer = csv.DictWriter(fEduInfo, fieldnames=fieldnames)
 	writer.writeheader()
