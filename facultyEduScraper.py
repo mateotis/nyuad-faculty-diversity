@@ -45,8 +45,26 @@ for i in range(0,200): # Arbitrary range, faculty numbers are much less than thi
 		break # Terminate when we reach the end of the faculty list
 
 	facultyName = faculty.find("a").text # Their name is within a link
+	facultyTitle = faculty.find("span", itemprop="jobTitle").text # Their job title is in a span tag
+
+	# Finding their department within the title - based on their possible positions
+	if(facultyTitle.find("Professor of ") != -1):
+		facultyDept = facultyTitle[facultyTitle.find("Professor of ")+13:]
+	elif(facultyTitle.find("Instructor of ") != -1):
+		facultyDept = facultyTitle[facultyTitle.find("Instructor of ")+14:]
+	elif(facultyTitle.find("Lecturer of ") != -1):
+		facultyDept = facultyTitle[facultyTitle.find("Lecturer of ")+12:]
+	elif(facultyTitle.find("Head of ") != -1):
+		facultyDept = facultyTitle[facultyTitle.find("Head of ")+8:]
+	else:
+		facultyDept = "Unknown"
+
+	# Add it all to the info list
 	facultyInfo.append(facultyName)
 	facultyInfo.append(dataDiv)
+	facultyInfo.append(facultyTitle)
+	facultyInfo.append(facultyDept)
+
 	facultyEduLoc = faculty.text.find("Education") # Find the Education string
 
 	if(facultyEduLoc == -1):
@@ -81,15 +99,16 @@ for i in range(0,200): # Arbitrary range, faculty numbers are much less than thi
 		else:
 			facultyOther.append(almamater)
 
-	facultyInfo.extend([facultyBachelors, facultyMasters, facultyDoctorates, facultyOther])
+	facultyInfo.extend([facultyBachelors, facultyMasters, facultyDoctorates, facultyOther]) # Add all alma mater found to the info list
 	facultyTotal.append(facultyInfo)
 
 for facultyInfo in facultyTotal:
-	print("Name:", facultyInfo[0], "\n", "Division:", facultyInfo[1], "\n", "Bachelor's:", facultyInfo[2], "\n", "Master's:", facultyInfo[3], "\n", "Doctorate:", facultyInfo[4], "\n", "Other:", facultyInfo[5], "\n\n")
+	print("Name:", facultyInfo[0], "\n", "Division:", facultyInfo[1], "\n", "Title:", facultyInfo[2], "\n", "Department:", facultyInfo[3], "\n", "Bachelor's:", facultyInfo[4], "\n", "Master's:", facultyInfo[5], "\n", "Doctorate:", facultyInfo[6], "\n", "Other:", facultyInfo[7], "\n\n")
 
+# Write results to CSV file, name based on division
 with open(csvName, mode='w', encoding = "UTF-8") as fEduInfo:
-	fieldnames = ["Name", "Division", "Bachelor's", "Master's", "Doctorate", "Other"]
+	fieldnames = ["Name", "Division", "Title", "Department", "Bachelor's", "Master's", "Doctorate", "Other"]
 	writer = csv.DictWriter(fEduInfo, fieldnames=fieldnames)
 	writer.writeheader()
 	for f in facultyTotal:
-		writer.writerow({'Name': f[0], 'Division': f[1], "Bachelor's": f[2], "Master's": f[3], "Doctorate": f[4], "Other": f[5]})
+		writer.writerow({"Name": f[0], "Division": f[1],"Title": f[2], "Department": f[3], "Bachelor's": f[4], "Master's": f[5], "Doctorate": f[6], "Other": f[7]})
